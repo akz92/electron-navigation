@@ -67,13 +67,13 @@ function Navigation(options) {
      * ADD ELEMENTS
      */
     if (options.showBackButton) {
-        $('#nav-body-ctrls').append('<i id="nav-ctrls-back" class="nav-icons" title="Go back">' + this.SVG_BACK + '</i>')
+        $('#nav-body-ctrls').append('<i id="nav-ctrls-back" class="nav-icons disabled" title="Go back">' + this.SVG_BACK + '</i>')
     }
     if (options.showForwardButton) {
-        $('#nav-body-ctrls').append('<i id="nav-ctrls-forward" class="nav-icons" title="Go forward">' + this.SVG_FORWARD + '</i>')
+        $('#nav-body-ctrls').append('<i id="nav-ctrls-forward" class="nav-icons disabled" title="Go forward">' + this.SVG_FORWARD + '</i>')
     }
     if (options.showReloadButton) {
-        $('#nav-body-ctrls').append('<i id="nav-ctrls-reload" class="nav-icons" title="Reload page">' + this.SVG_RELOAD + '</i>')
+        $('#nav-body-ctrls').append('<i id="nav-ctrls-reload" class="nav-icons disabled" title="Reload page">' + this.SVG_RELOAD + '</i>')
     }
     if (options.showUrlBar) {
         $('#nav-body-ctrls').append('<input id="nav-ctrls-url" type="text" title="Enter an address or search term"/>')
@@ -105,7 +105,7 @@ function Navigation(options) {
 
         var session = $('.nav-views-view[data-session="' + sessionID + '"]')[0]
         NAV._updateUrl(session.getURL())
-        NAV._updateCtrls(session)
+        NAV._updateCtrls()
         //
         // close tab and view
         //
@@ -194,7 +194,14 @@ function Navigation(options) {
     //
     // update back and forward buttons
     //
-    this._updateCtrls = function (webview) {
+    this._updateCtrls = function () {
+        webview = $('.nav-views-view.active')[0]
+        if (!webview) {
+            $('#nav-ctrls-back').addClass('disabled')
+            $('#nav-ctrls-forward').addClass('disabled')
+            $('#nav-ctrls-reload').html(this.SVG_RELOAD).addClass('disabled')
+            return
+        }
         if (webview.canGoBack()) {
             $('#nav-ctrls-back').removeClass('disabled')
         } else {
@@ -205,7 +212,26 @@ function Navigation(options) {
         } else {
             $('#nav-ctrls-forward').addClass('disabled')
         }
+        if (webview.isLoading()) {
+          this._loading()
+        } else {
+          this._stopLoading()
+        }
     } //:_updateCtrls()
+    //
+    // start loading animations
+    //
+    this._loading = function () {
+        $('.nav-tabs-tab.active').find('.nav-tabs-favicon').css('animation', 'nav-spin 2s linear infinite')
+        $('#nav-ctrls-reload').html(this.SVG_CLEAR)
+    } //:_loading()
+    //
+    // stop loading animations
+    //
+    this._stopLoading = function () {
+        $('.nav-tabs-tab.active').find('.nav-tabs-favicon').css('animation', '')
+        $('#nav-ctrls-reload').html(this.SVG_RELOAD)
+    } //:_stopLoading()
     //
     // auto add http protocol to url input or do a search
     //
@@ -243,12 +269,10 @@ function Navigation(options) {
             }
         })
         webview.on('did-start-loading', function () {
-            currtab.find('.nav-tabs-favicon').css('animation', 'nav-spin 2s linear infinite')
-            $('#nav-ctrls-reload').html(NAV.SVG_CLEAR)
+            NAV._loading()
         })
         webview.on('did-stop-loading', function () {
-            currtab.find('.nav-tabs-favicon').css('animation', '')
-            $('#nav-ctrls-reload').html(NAV.SVG_RELOAD)
+            NAV._stopLoading()
         })
         webview.on('enter-html-full-screen', function () {
             $('.nav-views-view.active').siblings().not('script').hide()
@@ -259,7 +283,7 @@ function Navigation(options) {
             $('.nav-views-view.active').parents().siblings().not('script').show()
         })
         webview.on('load-commit', function () {
-            NAV._updateCtrls(webview[0])
+            NAV._updateCtrls()
         })
         webview[0].addEventListener('did-navigate', function (res) {
           NAV._updateUrl(res.url)
@@ -404,6 +428,7 @@ Navigation.prototype.newTab = function (url, options) {
             $('#nav-body-views').append('<webview id="' + options.id + '" class="nav-views-view active" data-session="' + this.SESSION_ID + '" src="' + this._purifyUrl(url) + '"></webview>')
         }
     }
+    $('#nav-ctrls-reload').removeClass('disabled')
     this._updateUrl(this._purifyUrl(url))
     return this._addEvents(this.SESSION_ID++, options.icon, options.title)
 } //:newTab()
@@ -449,6 +474,7 @@ Navigation.prototype.closeTab = function (id) {
 
     session.remove()
     this._updateUrl()
+    this._updateCtrls()
 } //:closeTab()
 //
 // go back on current or specified view
