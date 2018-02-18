@@ -221,15 +221,27 @@ function Navigation(options) {
     //
     // start loading animations
     //
-    this._loading = function () {
-        $('.nav-tabs-tab.active').find('.nav-tabs-favicon').css('animation', 'nav-spin 2s linear infinite')
+    this._loading = function (tab) {
+        tab = tab || null
+
+        if (tab == null) {
+          tab = $('.nav-tabs-tab.active')
+        }
+
+        tab.find('.nav-tabs-favicon').css('animation', 'nav-spin 2s linear infinite')
         $('#nav-ctrls-reload').html(this.SVG_CLEAR)
     } //:_loading()
     //
     // stop loading animations
     //
-    this._stopLoading = function () {
-        $('.nav-tabs-tab.active').find('.nav-tabs-favicon').css('animation', '')
+    this._stopLoading = function (tab) {
+        tab = tab || null
+
+        if (tab == null) {
+          tab = $('.nav-tabs-tab.active')
+        }
+
+        tab.find('.nav-tabs-favicon').css('animation', '')
         $('#nav-ctrls-reload').html(this.SVG_RELOAD)
     } //:_stopLoading()
     //
@@ -269,10 +281,10 @@ function Navigation(options) {
             }
         })
         webview.on('did-start-loading', function () {
-            NAV._loading()
+            NAV._loading(currtab)
         })
         webview.on('did-stop-loading', function () {
-            NAV._stopLoading()
+            NAV._stopLoading(currtab)
         })
         webview.on('enter-html-full-screen', function () {
             $('.nav-views-view.active').siblings().not('script').hide()
