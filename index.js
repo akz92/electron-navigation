@@ -629,6 +629,27 @@ Navigation.prototype.openDevTools = function(id) {
         }
     }
 } //:openDevTools()
+//
+// go to a tab by index or keyword
+//
+Navigation.prototype.goToTab = function(index) {
+  $activeTabAndView = $('#nav-body-tabs .nav-tabs-tab.active, #nav-body-views .nav-views-view.active')
+
+  if (index == 'previous') {
+    $tabAndViewToActivate = $activeTabAndView.prev('#nav-body-tabs .nav-tabs-tab, #nav-body-views .nav-views-view')
+  } else if (index == 'next') {
+    $tabAndViewToActivate = $activeTabAndView.next('#nav-body-tabs .nav-tabs-tab, #nav-body-views .nav-views-view')
+  } else if (index == 'last') {
+    $tabAndViewToActivate = $('#nav-body-tabs .nav-tabs-tab:last-of-type, #nav-body-views .nav-views-view:last-of-type')
+  } else {
+    $tabAndViewToActivate =  $('#nav-body-tabs .nav-tabs-tab:nth-of-type(' + index  + '), #nav-body-views .nav-views-view:nth-of-type(' + index + ')')
+  }
+
+  if ($tabAndViewToActivate.length) {
+    $activeTabAndView.removeClass('active')
+    $tabAndViewToActivate.addClass('active')
+  }
+} //:goToTab()
 /**
  * MODULE EXPORTS
  */
