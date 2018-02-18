@@ -119,9 +119,10 @@ function Navigation(options) {
             } else {
                 session.prev().addClass('active')
             }
-            NAV._updateUrl('')
         }
         session.remove()
+        NAV._updateUrl()
+        NAV._updateCtrls()
         return false
     })
     //
