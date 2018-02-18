@@ -21,6 +21,7 @@
  */
 var $ = require('jquery')
 var Color = require('color.js')
+var urlRegex = require('url-regex')
 /**
  * OBJECT
  */
@@ -248,8 +249,8 @@ function Navigation(options) {
     // auto add http protocol to url input or do a search
     //
     this._purifyUrl = function (url) {
-        if (/(\.\w+\/?|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d{1,4})?)$/i.test(url)) {
-            url = (!url.match(/^[a-zA-Z]+:\/\//)) ? 'http://' + url : url
+        if(urlRegex({ strict: false, exact: true }).test(url)) {
+            url = (url.match(/^https?:\/\/.*/)) ? url : 'http://' + url
         } else {
             url = (!url.match(/^[a-zA-Z]+:\/\//)) ? 'https://www.google.com/search?q=' + url.replace(' ', '+') : url
         }
@@ -299,6 +300,9 @@ function Navigation(options) {
         })
         webview[0].addEventListener('did-navigate', function (res) {
           NAV._updateUrl(res.url)
+        })
+        webview[0].addEventListener('did-fail-load', function (res) {
+          NAV._updateUrl(res.validatedUrl)
         })
         webview[0].addEventListener('did-navigate-in-page', function (res) {
           NAV._updateUrl(res.url)
