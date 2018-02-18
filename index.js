@@ -646,6 +646,7 @@ Navigation.prototype.goToTab = function(index) {
   }
 
   if ($tabAndViewToActivate.length) {
+    $('#nav-ctrls-url').blur()
     $activeTabAndView.removeClass('active')
     $tabAndViewToActivate.addClass('active')
     this._updateUrl()
